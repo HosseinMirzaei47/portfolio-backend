@@ -1,4 +1,5 @@
-const { Project } = require("./data/projects");
+const { Project } = require("./model/project");
+const { Info } = require("./model/info");
 const mongoose = require("mongoose");
 const uri = require('./config/keys').MongoURI
 
@@ -15,10 +16,18 @@ const projects = [
     },
 ];
 
+const info = {
+    name: "Hossein Mirzazadeh",
+    profession: "Android Developer - English Teacher",
+    company: "Part Software Company",
+    summary: "I have been trying to conceptualize app solutions using the latest technologies at the companiy I have been working for. To me, there is nothing more interesting than overcoming challenges and helping others and myself grow."
+}
+
 async function seed() {
     await mongoose.connect(uri);
 
     await Project.deleteMany({});
+    await Info.deleteMany({});
 
     for (let project of projects) {
         await new Project({
@@ -28,9 +37,16 @@ async function seed() {
         }).save();
     }
 
+    await new Info({
+        name: info.name,
+        profession: info.profession,
+        company: info.company,
+        summary: info.summary,
+    }).save()
+
     mongoose.disconnect();
 
-    console.info("Done!");
+    console.info("Populated database successfully!");
 }
 
 seed();

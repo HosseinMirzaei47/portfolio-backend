@@ -1,20 +1,36 @@
-const info = require("../data/info");
+const validateObjectId = require("../middleware/validateObjectId");
+const { Info, validate } = require("../model/info");
 const express = require("express");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+    const info = await Info.find()
+        .select("-__v")
+        .sort("name");
     res.send(info)
 });
 
-router.put("/", async (req, res) => {
-    // validate schema
+router.put("/:id", async (req, res) => {
 
-    info.name = req.body.name
-    info.profession = req.body.profession
-    info.company = req.body.company
-    info.summary = req.body.summary
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    res.send(info)
+
+    const info = await Info.findByIdAndUpdate(
+        req.params.id,
+        {
+            name: req.body.name,
+            profession: req.body.profession,
+            company: req.body.company,
+            summary: req.body.summary,
+        },
+        { new: true }
+    );
+
+
+    if (!info) return res.status(404).send("The info with the given ID was not found.");
+
+    res.send(info);
 });
 
 module.exports = router;
