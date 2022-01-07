@@ -1,50 +1,58 @@
-const projects = require("../data/projects");
+const validateObjectId = require("../middleware/validateObjectId");
+const { Project, validate } = require("../data/projects");
 const express = require("express");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+    const projects = await Project.find()
+        .select("-__v")
+        .sort("name");
     res.send(projects)
 });
 
-router.get("/:name", async (req, res) => {
-    const project = projects.find((p) => p.name === req.params.name)
-    if (!project) return res.status(404).send('Not found')
-    res.send(project)
+router.get("/:id", validateObjectId, async (req, res) => {
+    const project = await Project.findById(req.params.id).select("-__v");
+    if (!project) return res.status(404).send("The project with the given name was not found.");
+    res.send(project);
 });
 
-router.put("/:name", async (req, res) => {
-    const project = projects.find((p) => p.name === req.params.name)
-    if (!project) return res.status(404).send('Not found')
+router.put("/:id", async (req, res) => {
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    var index = projects.indexOf(project);
-    projects[index] = req.body;
+    const project = await Project.findByIdAndUpdate(
+        req.params.id,
+        {
+            name: req.body.name,
+            description: req.body.description,
+            platform: req.body.platform
+        },
+        { new: true }
+    );
 
-    res.send(projects[index])
+    if (!project) return res.status(404).send("The project with the given ID was not found.");
+
+    res.send(project);
 });
 
-router.delete("/:name", async (req, res) => {
-    const project = projects.find((p) => p.name === req.params.name)
-    if (!project) return res.status(404).send('Not found')
-
-    const index = projects.indexOf(project)
-    projects.splice(index, 1)
-
-    res.send(project)
+router.delete("/:id", async (req, res) => {
+    const project = await Project.findByIdAndRemove(req.params.id);
+    if (!project) return res.status(404).send("The project with the given ID was not found.");
+    res.send(project);
 });
 
 router.post("/", async (req, res) => {
-    const projectExists = projects.filter(project => project.name === req.body.name).length > 0
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-    if (projectExists) return res.status(406).send(`A project exists with name ${req.body.name}`)
-
-    const project = {
+    let project = new Project({
         name: req.body.name,
         description: req.body.description,
         platform: req.body.platform
-    }
+    });
+    project = await project.save();
 
-    projects.push(project)
-    res.send(project)
+    res.send(project);
 });
 
 module.exports = router;

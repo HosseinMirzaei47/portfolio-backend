@@ -1,3 +1,24 @@
+const mongoose = require('mongoose');
+
+const Info = mongoose.model('Info', new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    profession: {
+        type: String,
+        required: true
+    },
+    company: {
+        type: String,
+        required: true
+    },
+    summary: {
+        type: String,
+        required: true
+    },
+}));
+
 const info = {
     name: "Hossein Mirzazadeh",
     profession: "Android Developer - English Teacher",
