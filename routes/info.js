@@ -1,5 +1,5 @@
-const validateObjectId = require("../middleware/validateObjectId");
-const { Info, validate } = require("../model/info");
+const auth = require("../middleware/auth");
+const {Info, validate} = require("../model/info");
 const express = require("express");
 const router = express.Router();
 
@@ -10,9 +10,9 @@ router.get("/", async (req, res) => {
     res.send(info)
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
 
-    const { error } = validate(req.body);
+    const {error} = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
 
@@ -24,7 +24,7 @@ router.put("/:id", async (req, res) => {
             company: req.body.company,
             summary: req.body.summary,
         },
-        { new: true }
+        {new: true}
     );
 
 

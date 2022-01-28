@@ -1,5 +1,6 @@
-const { Project } = require("./model/project");
-const { Info } = require("./model/info");
+const {Project} = require("./model/project");
+const {Info} = require("./model/info");
+const {User} = require("./model/user");
 const mongoose = require("mongoose");
 const uri = require('./config/keys').MongoURI
 
@@ -11,7 +12,7 @@ const projects = [
     },
     {
         name: "Which One Is Larger",
-        description: "Functionality Nattramn is an application which allows users to publish their articles online. A user can share, comment on, like, search articles. App uses Room to display caches data to UI when offline and requests to update local data using Retrofit library. Development Environment The app is written entirely in Kotlin and uses the Gradle build system. Architecture The architecture is built around Android Architecture Components. I followed the recommendations laid out in the Guide to App Architecture when deciding on the architecture for the app. I kept logic away from Activities and Fragments and moved it to ViewModels. I observed data using LiveData and used the Data Binding Library to bind UI components in layouts to the app's data sources. I used a Repository layer for handling data operations. I used Navigation component to simplify into a single Activity app. I used Kotlin Coroutines to handle operations proper threads in Android.",
+        description: "Crap",
         platform: "Android"
     },
 ];
@@ -23,11 +24,19 @@ const info = {
     summary: "I have been trying to conceptualize app solutions using the latest technologies at the companiy I have been working for. To me, there is nothing more interesting than overcoming challenges and helping others and myself grow."
 }
 
+const user = {
+    name: "Hossein Mirzazadeh",
+    email: "hosseinhidd@gmail.com",
+    password: "mypassword",
+    isAdmin: false,
+}
+
 async function seed() {
     await mongoose.connect(uri);
 
     await Project.deleteMany({});
     await Info.deleteMany({});
+    await User.deleteMany({});
 
     for (let project of projects) {
         await new Project({
@@ -42,6 +51,12 @@ async function seed() {
         profession: info.profession,
         company: info.company,
         summary: info.summary,
+    }).save()
+
+    await new User({
+        name: user.name,
+        email: user.email,
+        password: user.password,
     }).save()
 
     mongoose.disconnect();

@@ -1,5 +1,6 @@
 const validateObjectId = require("../middleware/validateObjectId");
-const { Project, validate } = require("../model/project");
+const auth = require("../middleware/auth");
+const {Project, validate} = require("../model/project");
 const express = require("express");
 const router = express.Router();
 
@@ -16,8 +17,8 @@ router.get("/:id", validateObjectId, async (req, res) => {
     res.send(project);
 });
 
-router.put("/:id", async (req, res) => {
-    const { error } = validate(req.body);
+router.put("/:id", auth, async (req, res) => {
+    const {error} = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     const project = await Project.findByIdAndUpdate(
@@ -27,7 +28,7 @@ router.put("/:id", async (req, res) => {
             description: req.body.description,
             platform: req.body.platform
         },
-        { new: true }
+        {new: true}
     );
 
     if (!project) return res.status(404).send("The project with the given ID was not found.");
@@ -35,14 +36,14 @@ router.put("/:id", async (req, res) => {
     res.send(project);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const project = await Project.findByIdAndRemove(req.params.id);
     if (!project) return res.status(404).send("The project with the given ID was not found.");
     res.send(project);
 });
 
-router.post("/", async (req, res) => {
-    const { error } = validate(req.body);
+router.post("/", auth, async (req, res) => {
+    const {error} = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     let project = new Project({

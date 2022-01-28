@@ -11,7 +11,7 @@ require("./startup/config")();
 
 const port = process.env.PORT || config.get("port");
 const server = app.listen(port, () =>
-  winston.info(`Listening on port ${port}...`)
+    winston.info(`Listening on port ${port}...`)
 );
 
 module.exports = server;
